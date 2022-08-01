@@ -46,9 +46,10 @@ body {
 .country {
   margin: 3rem 0!important;
   background-color: #fff;
-  box-shadow: 0 2rem 5rem 1rem rgba(0, 0, 0, 0.1);
+  box-shadow: 0 2rem 5rem 1rem rgb(0 0 0 / 10%);
   font-size: 1.8rem;
-  width: 30rem;
+  min-width: 30rem;
+  width: 23.438vw;
   border-radius: 0.7rem;
   /* overflow: hidden; */
 }
@@ -72,8 +73,10 @@ body {
 }
 
 .country__img {
-  width: 30rem;
-  height: 17rem;
+  min-width: 30rem;
+  width: 23.438vw;
+  min-height: 17rem;
+  height: calc(23.438vw * (17 / 30));
   object-fit: cover;
   background-color: #eee;
   border-top-left-radius: 0.7rem;
@@ -174,19 +177,22 @@ a.disabled{
   pointer-events: none;
 }
 
-@media only screen and (max-width: 960px){
+@media only screen and (max-width: 977px){
   .countries{
     font-size: 1.9rem;
   }
 
   .country{
     font-size: 1.7rem;
-    width: 27rem;
+    max-width: 33rem;
+    width: 40vw;
   }
   
   .country__img{
-    width: 27rem;
-    height: calc(27rem * (17 / 30));
+    max-width: 33rem;
+    width: 40vw;
+    max-height: calc(33rem * (17 / 30));
+    height: calc(40vw * (17 / 30));
   }
 
   .btn-country{
@@ -209,12 +215,18 @@ a.disabled{
   
   .country{
     font-size: 1.4rem;
-    width: 22rem;
+    min-width: 20rem;
+    max-width: 26rem !important;
+    width: 80vw;
   }
   
   .country__img{
-    width: 22rem;
-    height: calc(22rem * (17 / 30));
+    min-width: 20rem;
+    max-width: 26rem !important;
+    width: 80vw;
+    min-height: calc(20rem * (17 / 30));
+    height: calc(80vw * (17 / 30));
+    max-height: calc(26rem * (17 / 30));
   }
 
   .btn-country{
