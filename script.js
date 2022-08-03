@@ -9,23 +9,10 @@ const bodyBox = document.querySelector('.body');
 
 let id = "";
 let maxBox, neighbourCountriesData, images;
-let screenratio = $(window).width() / $(window).height() >= 1 ? 'Landscape' : 'Potrait';
+let screenratio = ($(window).width() / $(window).height()) >= 1 ? 'Landscape' : 'Potrait';
 
 
 ///////////////////////////////////////
-
-
-// Slicing array into chunks
-
-
-function sliceIntoChunks(arr, chunkSize) {
-  const res = [];
-  for (let i = 0; i < arr.length; i += chunkSize) {
-      const chunk = arr.slice(i, i + chunkSize);
-      res.push(chunk);
-  }
-  return res;
-}
 
 
 //Get Current Position
@@ -149,7 +136,7 @@ const renderCountry = (data, container, classname = '') => {
       <div class="country__data">
         <h3 class="country__name">${data.name}</h3>
         <h4 class="country__region">${data.region}</h4>
-        <p class="country__row"><span>👫</span>${(+data.population / 1000000).toFixed(1)} Million</p>
+        <p class="country__row"><span>👫</span>${populationString(data.population)}</p>
         <p class="country__row"><span>🗣️</span>${data.languages[0].name}</p>
         <p class="country__row"><span>💰</span>${data.currencies[0].name}</p>
       </div>
@@ -188,7 +175,7 @@ const renderNeighbourCountries = (neighbourCountriesData) => {
 
 
 const catchError = (err,msg) => {
-  // console.log('catchError working');
+  // console.error(err);
   if(err.message === 'No Neighbour country') return;
   countriesContainer.insertAdjacentText('beforeend', msg);
 }
@@ -238,10 +225,122 @@ const whereAmI = async () => {
 }
 
 
-// Clicking on button
+// Search the country
 
 
-btn.addEventListener('click',whereAmI)
+const searchCountry = () => {
+  const input = searchBar.value.toUpperCase();
+  menu.innerHTML = "";
+  if(input.length < 3) {
+    menu.style.display = "none";  
+    return;
+  };
+  menu.style.display = "block";
+  countryNames.forEach(country => {
+    if(country[0].toUpperCase().indexOf(input) > -1){
+      const liHtml = `<li><a href="#" data-code="${country[1]}" class="link">${country[0]} (${country[1]})</a></li>`;
+      menu.insertAdjacentHTML('beforeend',liHtml);
+    }
+  });
+  if(menu.innerHTML === "") {
+    menu.insertAdjacentHTML('beforeend', '<li><a href="#" class="disabled">Country Not Found</a></li>');
+  }
+}
+
+
+// Slicing array into chunks
+
+
+function sliceIntoChunks(arr, chunkSize) {
+  const res = [];
+  for (let i = 0; i < arr.length; i += chunkSize) {
+      const chunk = arr.slice(i, i + chunkSize);
+      res.push(chunk);
+  }
+  return res;
+}
+
+
+// Generating Population String
+
+
+const populationString = (population) => {
+  console.log(population + '');
+  console.log((population + '').length)
+  if((population + '').length > 9) return `${(+population / 1000000000).toFixed(3)} Billion`;
+  else if((population + '').length > 6) return `${(+population / 1000000).toFixed(1)} Million`;
+  else if((population + '').length === 6) return `${(+population / 1000).toFixed(1)} Thousand`;
+  else if((population + '').length === 5) return `${(+population / 1000).toFixed(2)} Thousand`;
+  else if((population + '').length === 4) return `${(+population / 1000).toFixed(3)} Thousand`;
+  else if((population + '').length === 3) return `${+population} Hundred`;
+  else return `${+population} People`;
+}
+
+
+// Responsive
+
+
+const responsive = () => {
+  neighboursContainer.innerHTML = "";
+  renderNeighbourCountries(neighbourCountriesData);
+}
+
+window.addEventListener("resize", () => {
+if($(window).width() <= "675" && maxBox !== 1){
+  maxBox = 1;
+  if(neighbourCountriesData) responsive();
+}
+if ($(window).width() <= "960" && $(window).width() > "675"&& maxBox !== 2) {
+  maxBox = 2;
+  if(neighbourCountriesData) responsive();
+}
+if ($(window).width() > "960" && maxBox !== 3) {
+  maxBox = 3;
+  if(neighbourCountriesData) responsive();
+}
+if($(window).width() / $(window).height() >= 1 && screenratio !== 'Landscape') {
+  screenratio = 'Landscape';
+  if(images) renderBackground();
+}
+if($(window).width() / $(window).height() < 1 && screenratio !== 'Potrait') {
+  screenratio = 'Potrait';
+  if(images) renderBackground();
+}
+});
+
+
+// Event Listners
+
+
+body.addEventListener('click',(e) =>{
+  const linkClicked = (e.target.closest('#myMenu') || e.target.closest('#mySearch'));
+  if(linkClicked) return;
+  menu.style.display = "none"; 
+});
+
+searchBar.addEventListener('click',searchCountry);
+
+menu.addEventListener('click',(e) => {
+  searchBar.value = "";
+  const clicked = e.target.closest('.link');
+  if(!clicked) return;
+  menu.style.display = "none"; 
+  clearData();
+  const countrycode = clicked.dataset.code;
+  getCountryData(countrycode);
+});
+
+btn.addEventListener('click',whereAmI);
+
+
+// IIFE 
+
+
+(() => {
+if($(window).width() > "960") maxBox = 3;
+else if($(window).width() <= "960" && $(window).width() > "675") maxBox = 2;
+else maxBox = 1;
+})();
 
 
 // List of Countries and their Codes 
@@ -270,81 +369,3 @@ const countryNames = [
 //   }
 // })();
 
-
-// Responsive
-
-const responsive = () => {
-    neighboursContainer.innerHTML = "";
-    renderNeighbourCountries(neighbourCountriesData);
-}
-
-window.addEventListener("resize", () => {
-  if($(window).width() <= "675" && maxBox !== 1){
-    maxBox = 1;
-    if(neighbourCountriesData) responsive();
-  }
-  if ($(window).width() <= "960" && $(window).width() > "675"&& maxBox !== 2) {
-    maxBox = 2;
-    if(neighbourCountriesData) responsive();
-  }
-  if ($(window).width() > "960" && maxBox !== 3) {
-    maxBox = 3;
-    if(neighbourCountriesData) responsive();
-  }
-  if($(window).width() / $(window).height() >= 1 && screenratio !== 'Landscape') {
-    screenratio = 'Landscape';
-    if(images) renderBackground();
-  }
-  if($(window).width() / $(window).height() < 1 && screenratio !== 'Potrait') {
-    screenratio = 'Potrait';
-    if(images) renderBackground();
-  }
-});
-
-
-// Search the country
-
-
-const searchCountry = () => {
-  const input = searchBar.value.toUpperCase();
-  menu.innerHTML = "";
-  if(input.length < 3) {
-    menu.style.display = "none";  
-    return;
-  };
-  menu.style.display = "block";
-  countryNames.forEach(country => {
-    if(country[0].toUpperCase().indexOf(input) > -1){
-      const liHtml = `<li><a href="#" data-code="${country[1]}" class="link">${country[0]} (${country[1]})</a></li>`;
-      menu.insertAdjacentHTML('beforeend',liHtml);
-    }
-  });
-  if(menu.innerHTML === "") {
-    menu.insertAdjacentHTML('beforeend', '<li><a href="#" class="disabled">Country Not Found</a></li>');
-  }
-}
-
-body.addEventListener('click',(e) =>{
-  const linkClicked = (e.target.closest('#myMenu') || e.target.closest('#mySearch'));
-  if(linkClicked) return;
-  menu.style.display = "none"; 
-})
-
-searchBar.addEventListener('click',searchCountry);
-
-menu.addEventListener('click',(e) => {
-  searchBar.value = "";
-  const clicked = e.target.closest('.link');
-  if(!clicked) return;
-  menu.style.display = "none"; 
-  clearData();
-  const countrycode = clicked.dataset.code;
-  getCountryData(countrycode);
-});
-
-
-(() => {
-  if($(window).width() > "960") maxBox = 3;
-  else if($(window).width() <= "960" && $(window).width() > "675") maxBox = 2;
-  else maxBox = 1;
-})();
