@@ -61,6 +61,10 @@ const getCountryData = async (countrycode) => {
   try{
     const data = await getJSON(`https://restcountries.com/v2/alpha/${countrycode}`,`Country Not Found`);
 
+    // Render Background
+
+    const background = await renderBackground(data.name); 
+
   //Rendering Main Country 
     renderCountry(data, countriesContainer);
     countriesContainer.style.opacity = 1;
@@ -96,6 +100,22 @@ const getCountryData = async (countrycode) => {
   };
   id =  "";
 }
+
+
+// render background image
+
+
+const renderBackground = async (country) => {
+  try {
+    const data = await getJSON(`https://api.unsplash.com/search/photos?query=${country}&client_id=CtlEUEjgZ6YVgmNHFhvqeSn2hpMgVnSqNtD3atffqyE`);
+    const url = data.results.find(img => img.width / img.height >= 1).urls.raw;
+    // console.log(data.results[0]);
+    console.log(url);
+    document.body.style.backgroundImage = `url('${url}')`;
+  } catch(e) {
+    document.body.style.backgroundImage = "none";
+  }
+};
 
 
 // Rendering Countries
