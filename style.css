@@ -60,6 +60,13 @@ body {
   /* overflow: hidden; */
 }
 
+.errorBox {
+  margin: 2rem 0 0.5rem 0;
+  padding: 2rem;
+  background-color: rgba(0,0,0,0.75);
+  color: #fff;
+}
+
 .neighbour::before {
   content: 'Neighbour country';
   width: 100%;

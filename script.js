@@ -177,6 +177,7 @@ const renderNeighbourCountries = (neighbourCountriesData) => {
 const catchError = (err,msg) => {
   // console.error(err);
   if(err.message === 'No Neighbour country') return;
+  countriesContainer.classList.add('errorBox');
   countriesContainer.insertAdjacentText('beforeend', msg);
 }
 
@@ -190,6 +191,7 @@ const clearData = () => {
   countriesContainer.style.opacity = 0;
   neighboursContainer.innerHTML = "";
   neighboursContainer.style.opacity = 0;
+  countriesContainer.classList.remove('errorBox');
 }
 
 
