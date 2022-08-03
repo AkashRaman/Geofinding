@@ -108,7 +108,7 @@ const getCountryData = async (countrycode) => {
 const renderBackground = async (country) => {
   try {
     const data = await getJSON(`https://api.unsplash.com/search/photos?query=${country}&client_id=CtlEUEjgZ6YVgmNHFhvqeSn2hpMgVnSqNtD3atffqyE`);
-    const url = data.results.find(img => img.width / img.height >= 1).urls.raw;
+    const url = data.results[0].urls.raw;
     // console.log(data.results[0]);
     console.log(url);
     document.body.style.backgroundImage = `url('${url}')`;
