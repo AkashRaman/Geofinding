@@ -164,11 +164,16 @@ body {
   border-radius: 0;
 } */
 
-/* Style the navigation menu */
+/* Style the search menu */
+
+#menuDiv{
+  width: 300px;
+}
+
 #myMenu {
   width: 300px;
-  /* top: 50vh;
-  position: absolute; */
+  /* top: 50vh; */
+  position: absolute;
   background-color: #ddd;
   font-size: 1.2rem;
   list-style-type: none;
@@ -247,6 +252,7 @@ a.disabled{
 
   .btn-country{
     padding: 1.5rem 3.75rem;
+    margin-bottom: 3rem;
   }
 
   .neighbour {
@@ -258,7 +264,8 @@ a.disabled{
   }
 
   #mySearch,
-  #myMenu{
+  #myMenu,
+  #menuDiv{
     min-width: 20rem;
     max-width: 30rem !important;
     width: 80vw;
