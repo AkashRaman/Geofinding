@@ -5,10 +5,11 @@ const countriesContainer = document.querySelector('.countries');
 const neighboursContainer = document.querySelector('.neighbours');
 const searchBar = document.getElementById("mySearch");
 const menu = document.querySelector('#myMenu');
+const bodyBox = document.querySelector('.body');
 
 let id = "";
-let maxBox = 3;
-let neighbourCountriesData = []
+let maxBox, neighbourCountriesData, images;
+let screenratio = $(window).width() / $(window).height() >= 1 ? 'Landscape' : 'Potrait';
 
 
 ///////////////////////////////////////
@@ -63,7 +64,7 @@ const getCountryData = async (countrycode) => {
 
     // Render Background
 
-    const background = await renderBackground(data.name); 
+    getBackgroundImages(data.name); 
 
   //Rendering Main Country 
     renderCountry(data, countriesContainer);
@@ -73,7 +74,7 @@ const getCountryData = async (countrycode) => {
 
     if(!data.borders) throw new Error(`No Neighbour country`);
     const neighbours = data.borders;
-    console.log(neighbours);
+    // console.log(neighbours);
     // Getting nad rendering neighbour countries data
 
     const GetNeighbourData = await Promise.allSettled(neighbours.map(async neighbour => getJSON(`https://restcountries.com/v2/alpha/${neighbour}`,`Country Not Found`)));
@@ -93,7 +94,7 @@ const getCountryData = async (countrycode) => {
 
     neighboursContainer.style.opacity = 1;
     renderNeighbourCountries(neighbourCountriesData);
-    console.log(neighbourCountriesData);
+    // console.log(neighbourCountriesData);
   }catch(err) {
     catchError(err,`${err.message}, Try Again!!`);
     countriesContainer.style.opacity = 1;
@@ -102,20 +103,40 @@ const getCountryData = async (countrycode) => {
 }
 
 
+// get background images
+
+
+const getBackgroundImages = async (country) => {
+  try {
+    const data = await getJSON(`https://api.unsplash.com/search/photos?query=${country}&client_id=CtlEUEjgZ6YVgmNHFhvqeSn2hpMgVnSqNtD3atffqyE`);
+    images = data.results;
+    // console.log(images)
+    renderBackground();
+  } catch(e) {
+    bodyBox.style.backgroundImage = "none";
+  }
+};
+
+
 // render background image
 
 
-const renderBackground = async (country) => {
-  try {
-    const data = await getJSON(`https://api.unsplash.com/search/photos?query=${country}&client_id=CtlEUEjgZ6YVgmNHFhvqeSn2hpMgVnSqNtD3atffqyE`);
-    const url = data.results.find(img => img.width / img.height >= 1).urls.raw;
-    // console.log(data.results[0]);
-    console.log(url);
-    document.body.style.backgroundImage = `url('${url}')`;
-  } catch(e) {
-    document.body.style.backgroundImage = "none";
-  }
-};
+const renderBackground = () => {
+  let image = images.find(img => {
+    if (screenratio === 'Landscape') {
+      return img.width / img.height >= 1;
+    }
+    if (screenratio === 'Potrait') {
+      return img.width / img.height < 1;
+    }
+  });
+  if(!images) image = images[0];
+  // console.log(image);
+  const url = image.urls.raw;
+  // console.log(data.results[0]);
+  // console.log(url);
+  bodyBox.style.backgroundImage = `url('${url}')`;
+}
 
 
 // Rendering Countries
@@ -259,27 +280,26 @@ const responsive = () => {
 
 window.addEventListener("resize", () => {
   if($(window).width() <= "675" && maxBox !== 1){
-    console.log($(window).width());
     maxBox = 1;
-    if(neighbourCountriesData !== []) responsive();
+    if(neighbourCountriesData) responsive();
   }
   if ($(window).width() <= "960" && $(window).width() > "675"&& maxBox !== 2) {
-    console.log($(window).width());
     maxBox = 2;
-    if(neighbourCountriesData !== []) responsive();
+    if(neighbourCountriesData) responsive();
   }
   if ($(window).width() > "960" && maxBox !== 3) {
-    console.log($(window).width());
     maxBox = 3;
-    if(neighbourCountriesData !== []) responsive();
+    if(neighbourCountriesData) responsive();
+  }
+  if($(window).width() / $(window).height() >= 1 && screenratio !== 'Landscape') {
+    screenratio = 'Landscape';
+    if(images) renderBackground();
+  }
+  if($(window).width() / $(window).height() < 1 && screenratio !== 'Potrait') {
+    screenratio = 'Potrait';
+    if(images) renderBackground();
   }
 });
-
-(() => {
-  if($(window).width() > "960") maxBox = 3;
-  else if($(window).width() <= "960" && $(window).width() > "675") maxBox = 2;
-  else maxBox = 1;
-})();
 
 
 // Search the country
@@ -320,4 +340,11 @@ menu.addEventListener('click',(e) => {
   clearData();
   const countrycode = clicked.dataset.code;
   getCountryData(countrycode);
-})
+});
+
+
+(() => {
+  if($(window).width() > "960") maxBox = 3;
+  else if($(window).width() <= "960" && $(window).width() > "675") maxBox = 2;
+  else maxBox = 1;
+})();
