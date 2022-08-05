@@ -17,34 +17,37 @@
   </head>
   <body>
     <script defer src="script.js"></script>
+    <script src="https://kit.fontawesome.com/e6dea43f5b.js"></script>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <div class="body">
+    <main class="container">
       <input type="text" id="mySearch" onkeyup="searchCountry()" placeholder="Search Country.." title="Type in a category">
       <div id="menuDiv">
         <ul id="myMenu">
         </ul>
       </div>
-          <main class="container">
-            <div class="countries">
-              <!--
-              <article class="country">
-                <img class="country__img" src="" />
-                <div class="country__data">
-                  <h3 class="country__name">COUNTRY</h3>
-                  <h4 class="country__region">REGION</h4>
-                  <p class="country__row"><span>👫</span>POP people</p>
-                  <p class="country__row"><span>🗣️</span>LANG</p>
-                  <p class="country__row"><span>💰</span>CUR</p>
-                </div>
-              </article>
-              -->
-            </div>
-            <div class="neighbours">
-              
-            </div>
-            <button class="btn-country">Where am I?</button>
-            <div class="images"></div>
-          </main>  
+      <div class="countries">
+        <!--
+        <article class="country">
+          <img class="country__img" src="" />
+          <div class="country__data">
+            <h3 class="country__name">COUNTRY</h3>
+            <h4 class="country__region">REGION</h4>
+            <p class="country__row"><span>👫</span>POP people</p>
+            <p class="country__row"><span>🗣️</span>LANG</p>
+            <p class="country__row"><span>💰</span>CUR</p>
+          </div>
+        </article>
+        -->
+      </div>
+      <div class="neighbours"></div>
+      <div class="images"></div>
+      <button class="btn-country">Where am I?</button>
+    </main>  
+    <div id="infoContainer">
+      <h1 id="infoTitle">Welcome To Geofinding</h1>
+      <p>Geofinding is a website that gives information of the requested country, or the country u lives.</p>
+      <p>Search for the country and select the one u want from the result. You can also click the "Where am I?" button to get information of the country u lives</p>
     </div>
+    <i class="fas fa-info-circle" id="infoBtn"></i>
   </body>
 </html>

@@ -5,10 +5,13 @@ const countriesContainer = document.querySelector('.countries');
 const neighboursContainer = document.querySelector('.neighbours');
 const searchBar = document.getElementById("mySearch");
 const menu = document.querySelector('#myMenu');
-const bodyBox = document.querySelector('.body');
+const bodyBox = document.querySelector('.container');
+const infoBox = document.querySelector('#infoContainer');
+const infoBtn = document.querySelector('#infoBtn');
 
 let id = "";
-let maxBox, neighbourCountriesData, images;
+let maxBox, neighbourCountriesData = [], images,backgroundImage;
+
 let screenratio = ($(window).width() / $(window).height()) >= 1 ? 'Landscape' : 'Potrait';
 
 
@@ -51,8 +54,12 @@ const getCountryData = async (countrycode) => {
 
     // Render Background
 
-    getBackgroundImages(data.name); 
+    await new Promise((resolve,reject) => {
+      getBackgroundImages(data.name);
+      resolve();
+    })  
 
+    getInfo(data.name);
   //Rendering Main Country 
     renderCountry(data, countriesContainer);
     countriesContainer.style.opacity = 1;
@@ -100,7 +107,8 @@ const getBackgroundImages = async (country) => {
     // console.log(images)
     renderBackground();
   } catch(e) {
-    bodyBox.style.backgroundImage = "none";
+    console.error(e);
+    body.style.backgroundImage = "none";
   }
 };
 
@@ -109,20 +117,90 @@ const getBackgroundImages = async (country) => {
 
 
 const renderBackground = () => {
-  let image = images.find(img => {
-    if (screenratio === 'Landscape') {
-      return img.width / img.height >= 1;
-    }
-    if (screenratio === 'Potrait') {
-      return img.width / img.height < 1;
-    }
-  });
+  let image = images.find(img => getImageInRato(img,screenratio));
+  
+  backgroundImage = image;
   if(!images) image = images[0];
   // console.log(image);
   const url = image.urls.raw;
   // console.log(data.results[0]);
   // console.log(url);
-  bodyBox.style.backgroundImage = `url('${url}')`;
+  body.style.backgroundImage = `url('${url}')`;
+}
+
+
+const getImageInRato = (img, scrnratio) => {
+  if (scrnratio === 'Landscape') {
+    return img.width / img.height >= 1;
+  }
+  if (scrnratio === 'Potrait') {
+    return img.width / img.height < 1;
+  }
+}
+
+
+// Getting Info of the country
+
+
+const getInfo = async country => {
+  try {
+    const data = await getJSON(`https://en.wikipedia.org/w/api.php?action=query&prop=extracts&origin=*&format=json&generator=search&gsrnamespace=0&gsrlimit=1&gsrsearch=${country}`); 
+    const pages =  data.query.pages;
+    const fullHtml = pages[Object.keys(pages)[0]].extract;
+    const firstStart = fullHtml.indexOf('<p>')
+    const previousEnd = fullHtml.indexOf('</p>');
+    const firstEnd = fullHtml.indexOf('</p>',previousEnd + 1);
+    const secondStart = fullHtml.indexOf('<p>',firstStart + 1);
+    const secondEnd = fullHtml.indexOf('</p>',firstEnd + 1);    
+
+    let infoImages = images.map(img => {
+      if(img !== backgroundImage) return img;
+      else return 'skip';
+    });
+    let selectedImageUrls = [];
+    for(let i = 0; i < 2; i++){
+      let infoImg = infoImages.find(img => getImageInRato(img,'Landscape'));
+      if(!infoImg) infoImg = infoImages[i];
+      infoImages = infoImages.map(img => {
+        if(img !== infoImg) return img;
+        else return 'skip';
+      });
+      const url = infoImg.urls.raw;
+      selectedImageUrls.push(url);
+    } 
+
+    const para1Html = fullHtml.slice(firstStart,firstEnd + 4);
+    const img1Html = `<img src="${selectedImageUrls[0]}">`;
+    const para2Html = fullHtml.slice(secondStart,secondEnd + 4);
+    const img2Html = `<img src="${selectedImageUrls[1]}">`;
+
+    const html = img1Html + para1Html + img2Html + para2Html;
+    infoBox.insertAdjacentHTML('beforeend',`<h1 id="infoTitle">${country}</h1>`);
+    const infoTitle = document.querySelector('#infoTitle');
+    if(country.split(" ").length > 4) infoTitle.style.fontSize = '300%';
+    else if(country.split(" ").length > 1) infoTitle.style.fontSize = '400%';
+    else infoTitle.style.fontSize = '500%';
+    infoBox.insertAdjacentHTML('beforeend',html);
+    if(!body.classList.contains('slide')) slideInfoBox('Yes');
+    // console.log(start);
+    // console.log(end);
+    // console.log(html);
+  } catch(e) {
+    console.error(e);
+  }
+}
+
+
+// Sliding Info Box
+
+
+const slideInfoBox = (active) => {
+  if(active === 'Yes') {
+    body.classList.add('slide');
+  }
+  if(active === 'No') {
+    body.classList.remove('slide');
+  }
 }
 
 
@@ -191,6 +269,8 @@ const clearData = () => {
   countriesContainer.style.opacity = 0;
   neighboursContainer.innerHTML = "";
   neighboursContainer.style.opacity = 0;
+  neighbourCountriesData = [];
+  infoBox.innerHTML = "";
   countriesContainer.classList.remove('errorBox');
 }
 
@@ -267,8 +347,6 @@ function sliceIntoChunks(arr, chunkSize) {
 
 
 const populationString = (population) => {
-  console.log(population + '');
-  console.log((population + '').length)
   if((population + '').length > 9) return `${(+population / 1000000000).toFixed(3)} Billion`;
   else if((population + '').length > 6) return `${(+population / 1000000).toFixed(1)} Million`;
   else if((population + '').length === 6) return `${(+population / 1000).toFixed(1)} Thousand`;
@@ -287,30 +365,47 @@ const responsive = () => {
   renderNeighbourCountries(neighbourCountriesData);
 }
 
-window.addEventListener("resize", () => {
-if($(window).width() <= "675" && maxBox !== 1){
-  maxBox = 1;
-  if(neighbourCountriesData) responsive();
+const resize = () => {
+  // console.log(bodyBox.getBoundingClientRect().width);
+  // console.log(maxBox);
+  if(bodyBox.getBoundingClientRect().width <= 675 && maxBox !== 1){
+    maxBox = 1;
+    // console.log(maxBox);
+    if(neighbourCountriesData !== []) responsive();
+  }
+  if(body.classList.contains('slide'))responsiveVariation(1200);
+  else responsiveVariation(970);
 }
-if ($(window).width() <= "960" && $(window).width() > "675"&& maxBox !== 2) {
-  maxBox = 2;
-  if(neighbourCountriesData) responsive();
-}
-if ($(window).width() > "960" && maxBox !== 3) {
-  maxBox = 3;
-  if(neighbourCountriesData) responsive();
-}
-if($(window).width() / $(window).height() >= 1 && screenratio !== 'Landscape') {
-  screenratio = 'Landscape';
-  if(images) renderBackground();
-}
-if($(window).width() / $(window).height() < 1 && screenratio !== 'Potrait') {
-  screenratio = 'Potrait';
-  if(images) renderBackground();
-}
-});
 
+const responsiveVariation = (maxBox2MaxWidth) => {
+  if (bodyBox.getBoundingClientRect().width <= maxBox2MaxWidth && bodyBox.getBoundingClientRect().width > 675 && maxBox !== 2) {
+    maxBox = 2;
+    // console.log(maxBox);
+    if(neighbourCountriesData !== []) responsive();
+  }
+  if (bodyBox.getBoundingClientRect().width > maxBox2MaxWidth && maxBox !== 3) {
+    maxBox = 3;
+    // console.log(maxBox);
+    if(neighbourCountriesData !== []) responsive();
+  }
+}
 
+new ResizeObserver(resize).observe(bodyBox)
+
+window.addEventListener('resize', () => {
+
+  resize();
+  // alignInfoBtn();
+
+  if($(window).width() / $(window).height() >= 1 && screenratio !== 'Landscape') {
+    screenratio = 'Landscape';
+    if(images) renderBackground();
+  }
+  if($(window).width() / $(window).height() < 1 && screenratio !== 'Potrait') {
+    screenratio = 'Potrait';
+    if(images) renderBackground();
+  }
+})
 // Event Listners
 
 
@@ -334,6 +429,10 @@ menu.addEventListener('click',(e) => {
 
 btn.addEventListener('click',whereAmI);
 
+infoBtn.addEventListener('click',() => {
+  if(!body.classList.contains('slide')) slideInfoBox('Yes');
+  else slideInfoBox('No');
+});
 
 // IIFE 
 
