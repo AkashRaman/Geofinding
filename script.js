@@ -10,7 +10,7 @@ const infoBox = document.querySelector('#infoContainer');
 const infoBtn = document.querySelector('#infoBtn');
 
 let id = "";
-let maxBox, neighbourCountriesData = [], images,backgroundImage;
+let maxBox, neighbourCountriesData = [], images,backgroundImage,selectedImageUrls = [],infoImageType,backgroundImageType;
 
 let screenratio = ($(window).width() / $(window).height()) >= 1 ? 'Landscape' : 'Potrait';
 
@@ -118,15 +118,34 @@ const getBackgroundImages = async (country) => {
 
 const renderBackground = () => {
   let image = images.find(img => getImageInRato(img,screenratio));
-  
+  if(!image) image = images[0];
   backgroundImage = image;
-  if(!images) image = images[0];
-  // console.log(image);
-  const url = image.urls.raw;
+  // console.log(image.urls);
+  if($(window).width() <= 950) body.style.backgroundImage = `url('${backgroundImage.urls.regular}')`;
+  
+  if($(window).width() > 950) body.style.backgroundImage = `url('${backgroundImage.urls.raw}')`;
+  
+}
+
+
+// Changin Quality of Background Image
+
+
+const backgroundImageQualityChange = () => {
+  if($(window).width() <= 950 && backgroundImageType !== 'regular') {
+    backgroundImageType = 'regular';
+    body.style.backgroundImage = `url('${backgroundImage.urls.regular}')`;
+  } 
+  if($(window).width() > 950 && backgroundImageType !== 'raw') {
+    backgroundImageType = 'raw';
+    body.style.backgroundImage = `url('${backgroundImage.urls.raw}')`;
+  }
   // console.log(data.results[0]);
   // console.log(url);
-  body.style.backgroundImage = `url('${url}')`;
 }
+
+
+// selecting ratio of image
 
 
 const getImageInRato = (img, scrnratio) => {
@@ -135,6 +154,48 @@ const getImageInRato = (img, scrnratio) => {
   }
   if (scrnratio === 'Potrait') {
     return img.width / img.height < 1;
+  }
+}
+
+
+// Selecting images for info box
+
+
+const selectInfoImages = () => {
+  selectedImageUrls = [];
+  let infoImages = images.map(img => {
+    if(img !== backgroundImage) return img;
+    else return 'skip';
+  });
+  for(let i = 0; i < 2; i++){
+    let infoImg = infoImages.find(img => getImageInRato(img,'Landscape'));
+    if(!infoImg) infoImg = infoImages[i];
+    infoImages = infoImages.map(img => {
+      if(img !== infoImg) return img;
+      else return 'skip';
+    });
+    selectedImageUrls.push(infoImg.urls);      
+  } 
+}
+
+
+// Changina quality of Info Images
+
+
+const infoImageQualityChange = () => {
+  const img1 = document.querySelector('#img-1');
+  const img2 = document.querySelector('#img-2');
+  if((img1 && img2)) {
+    if(infoBox .getBoundingClientRect().width <= 350 && infoImageType !== 'small'){
+      infoImageType = 'small';
+      img1.src = selectedImageUrls[0].small;
+      img2.src = selectedImageUrls[1].small;
+    }
+    if(infoBox .getBoundingClientRect().width > 350 && infoImageType !== 'regular'){
+      infoImageType ='regular';
+      img1.src = selectedImageUrls[0].regular;
+      img2.src = selectedImageUrls[1].regular;
+    }
   }
 }
 
@@ -152,27 +213,14 @@ const getInfo = async country => {
     const firstEnd = fullHtml.indexOf('</p>',previousEnd + 1);
     const secondStart = fullHtml.indexOf('<p>',firstStart + 1);
     const secondEnd = fullHtml.indexOf('</p>',firstEnd + 1);    
-
-    let infoImages = images.map(img => {
-      if(img !== backgroundImage) return img;
-      else return 'skip';
-    });
-    let selectedImageUrls = [];
-    for(let i = 0; i < 2; i++){
-      let infoImg = infoImages.find(img => getImageInRato(img,'Landscape'));
-      if(!infoImg) infoImg = infoImages[i];
-      infoImages = infoImages.map(img => {
-        if(img !== infoImg) return img;
-        else return 'skip';
-      });
-      const url = infoImg.urls.raw;
-      selectedImageUrls.push(url);
-    } 
+    selectInfoImages();
+    
+    let sizeUrls = (infoBox .getBoundingClientRect().width <= 350) ? [selectedImageUrls[0].small,selectedImageUrls[1].small] : [selectedImageUrls[0].regular,selectedImageUrls[1].regular];
 
     const para1Html = fullHtml.slice(firstStart,firstEnd + 4);
-    const img1Html = `<img src="${selectedImageUrls[0]}">`;
+    const img1Html = `<img id="img-1" src="${sizeUrls[0]}">`;
     const para2Html = fullHtml.slice(secondStart,secondEnd + 4);
-    const img2Html = `<img src="${selectedImageUrls[1]}">`;
+    const img2Html = `<img id="img-2" src="${sizeUrls[1]}">`;
 
     const html = img1Html + para1Html + img2Html + para2Html;
     infoBox.insertAdjacentHTML('beforeend',`<h1 id="infoTitle">${country}</h1>`);
@@ -195,12 +243,8 @@ const getInfo = async country => {
 
 
 const slideInfoBox = (active) => {
-  if(active === 'Yes') {
-    body.classList.add('slide');
-  }
-  if(active === 'No') {
-    body.classList.remove('slide');
-  }
+  if(active === 'Yes') body.classList.add('slide');
+  if(active === 'No') body.classList.remove('slide');
 }
 
 
@@ -271,6 +315,7 @@ const clearData = () => {
   neighboursContainer.style.opacity = 0;
   neighbourCountriesData = [];
   infoBox.innerHTML = "";
+  selectedImageUrls = [];
   countriesContainer.classList.remove('errorBox');
 }
 
@@ -396,15 +441,22 @@ window.addEventListener('resize', () => {
 
   resize();
   // alignInfoBtn();
-
   if($(window).width() / $(window).height() >= 1 && screenratio !== 'Landscape') {
     screenratio = 'Landscape';
-    if(images) renderBackground();
+    if(images) {
+      renderBackground();
+      selectInfoImages();
+    }
   }
   if($(window).width() / $(window).height() < 1 && screenratio !== 'Potrait') {
     screenratio = 'Potrait';
-    if(images) renderBackground();
+    if(images) {
+      renderBackground();
+      selectInfoImages();
+    }
   }
+  if(images) infoImageQualityChange();
+  if(backgroundImage) backgroundImageQualityChange();
 })
 // Event Listners
 
@@ -438,9 +490,15 @@ infoBtn.addEventListener('click',() => {
 
 
 (() => {
-if($(window).width() > "960") maxBox = 3;
-else if($(window).width() <= "960" && $(window).width() > "675") maxBox = 2;
-else maxBox = 1;
+  if($(window).width() > "960") maxBox = 3;
+  else if($(window).width() <= "960" && $(window).width() > "675") maxBox = 2;
+  else maxBox = 1;
+
+  if(infoBox .getBoundingClientRect().width <= 350) infoImageType = 'small';
+  else infoImageType = 'regular';
+
+  if($(window).width() <= 950) backgroundImageType = 'regular';
+  else backgroundImageType = 'raw';
 })();
 
 
