@@ -10,7 +10,7 @@ const infoBox = document.querySelector('#infoContainer');
 const infoBtn = document.querySelector('#infoBtn');
 
 let id = "";
-let maxBox, neighbourCountriesData = [], images,backgroundImage,selectedImageUrls = [],infoImageType,backgroundImageType;
+let maxBox, neighbourCountriesData = [], images,backgroundImage,selectedImageUrls = [],infoImageType,backgroundImageType, slideBtnClasses = [],slideBtnArrowSideway;
 
 let screenratio = ($(window).width() / $(window).height()) >= 1 ? 'Landscape' : 'Potrait';
 
@@ -205,6 +205,7 @@ const infoImageQualityChange = () => {
 
 const getInfo = async country => {
   try {
+    infoBtn.classList.remove('fa-info-circle');
     const data = await getJSON(`https://en.wikipedia.org/w/api.php?action=query&prop=extracts&origin=*&format=json&generator=search&gsrnamespace=0&gsrlimit=1&gsrsearch=${country}`); 
     const pages =  data.query.pages;
     const fullHtml = pages[Object.keys(pages)[0]].extract;
@@ -245,6 +246,23 @@ const getInfo = async country => {
 const slideInfoBox = (active) => {
   if(active === 'Yes') body.classList.add('slide');
   if(active === 'No') body.classList.remove('slide');
+  toggleSlideBtnClasses();
+}
+
+
+// toggle Slide Button Classes
+
+
+const toggleSlideBtnClasses = () => {
+  if(!infoBtn.classList.contains('fa-info-circle')) {
+    if (body.classList.contains('slide')) {
+      infoBtn.classList.remove(slideBtnClasses[1]);
+      infoBtn.classList.add(slideBtnClasses[0]);
+    } else {
+      infoBtn.classList.remove(slideBtnClasses[0]);
+      infoBtn.classList.add(slideBtnClasses[1]);
+    }
+  }
 }
 
 
@@ -438,9 +456,9 @@ const responsiveVariation = (maxBox2MaxWidth) => {
 new ResizeObserver(resize).observe(bodyBox)
 
 window.addEventListener('resize', () => {
-
+  // console.log($(window).width());
   resize();
-  // alignInfoBtn();
+  
   if($(window).width() / $(window).height() >= 1 && screenratio !== 'Landscape') {
     screenratio = 'Landscape';
     if(images) {
@@ -448,6 +466,7 @@ window.addEventListener('resize', () => {
       selectInfoImages();
     }
   }
+
   if($(window).width() / $(window).height() < 1 && screenratio !== 'Potrait') {
     screenratio = 'Potrait';
     if(images) {
@@ -455,6 +474,26 @@ window.addEventListener('resize', () => {
       selectInfoImages();
     }
   }
+
+  if ($(window).width() > 674 && slideBtnArrowSideway !== 'true'){
+    slideBtnArrowSideway = 'true';
+    slideBtnClasses = ['fa-arrow-alt-circle-left','fa-arrow-alt-circle-right']; 
+    if(!infoBtn.classList.contains('fa-info-circle')) {
+      infoBtn.removeAttribute('class');
+      infoBtn.classList.add('fas');
+      toggleSlideBtnClasses();
+    }
+  }
+  if($(window).width() <= 674 && slideBtnArrowSideway !== 'false'){
+    slideBtnArrowSideway = 'false';
+    slideBtnClasses = ['fa-arrow-alt-circle-down','fa-arrow-alt-circle-up']; 
+    if(!infoBtn.classList.contains('fa-info-circle')) {
+      infoBtn.removeAttribute('class');
+      infoBtn.classList.add('fas');
+      toggleSlideBtnClasses();
+    }
+  }
+
   if(images) infoImageQualityChange();
   if(backgroundImage) backgroundImageQualityChange();
 })
@@ -486,6 +525,7 @@ infoBtn.addEventListener('click',() => {
   else slideInfoBox('No');
 });
 
+
 // IIFE 
 
 
@@ -499,6 +539,9 @@ infoBtn.addEventListener('click',() => {
 
   if($(window).width() <= 950) backgroundImageType = 'regular';
   else backgroundImageType = 'raw';
+  
+  slideBtnClasses = ($(window).width() > 674) ? ['fa-arrow-alt-circle-left','fa-arrow-alt-circle-right'] : ['fa-arrow-alt-circle-down','fa-arrow-alt-circle-up']; 
+  slideBtnArrowSideway = ($(window).width() > 674) ? 'true' : 'false'; 
 })();
 
 
