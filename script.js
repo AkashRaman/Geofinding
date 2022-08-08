@@ -293,7 +293,8 @@ const renderCountry = (data, container, classname = '') => {
 
 
 const renderNeighbourCountries = (neighbourCountriesData) => {
-  const neighbourCountriesChunk = sliceIntoChunks(neighbourCountriesData,maxBox);
+  const boxInRow = (maxBox > 1) ? maxBox : 2;
+  const neighbourCountriesChunk = sliceIntoChunks(neighbourCountriesData,boxInRow);
 
   neighbourCountriesChunk.forEach((neighbourChunk,i) => {
     const boxContainerHtml = `<div class="neighboursBox" id="boxContainer-${i}"></div>`;
@@ -302,9 +303,9 @@ const renderNeighbourCountries = (neighbourCountriesData) => {
     // console.log(neighbourChunk);
     // console.log(boxContainer);
     neighbourChunk.forEach((neighbour,j) => {
-      id = `country_${(maxBox * i) + j}`;
+      id = `country_${(boxInRow * i) + j}`;
       // console.log(neighbour);
-      renderCountry(neighbour, boxContainer,'neighbour')
+      (maxBox > 1) ? renderCountry(neighbour, boxContainer,'neighbour') : renderCountry(neighbour, boxContainer,'neighbour expandOnClick');
     })
     boxContainer.style.opacity = 1;
   })

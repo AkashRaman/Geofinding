@@ -110,6 +110,7 @@ body {
   align-items: center;
   justify-content: center;
   transition: all 1s;
+  position: relative;
 }
 
 .countries,
