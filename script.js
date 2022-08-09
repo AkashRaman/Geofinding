@@ -212,20 +212,21 @@ const getInfo = async country => {
     const data = await getJSON(`https://en.wikipedia.org/w/api.php?action=query&prop=extracts&origin=*&format=json&generator=search&gsrnamespace=0&gsrlimit=1&gsrsearch=${country}`); 
     const pages =  data.query.pages;
     const fullHtml = pages[Object.keys(pages)[0]].extract;
-    const firstStart = fullHtml.indexOf('<p>')
     const previousEnd = fullHtml.indexOf('</p>');
+    const firstStart = fullHtml.indexOf(country) - 6;
     const firstEnd = fullHtml.indexOf('</p>',previousEnd + 1);
     const secondStart = fullHtml.indexOf('<p>',firstStart + 1);
     const secondEnd = fullHtml.indexOf('</p>',firstEnd + 1);    
     selectInfoImages();
-    
+    // console.log(fullHtml)
     let sizeUrls = (infoBox .getBoundingClientRect().width <= 350) ? [selectedImageUrls[0].small,selectedImageUrls[1].small] : [selectedImageUrls[0].regular,selectedImageUrls[1].regular];
 
     const para1Html = fullHtml.slice(firstStart,firstEnd + 4);
     const img1Html = `<img id="img-1" src="${sizeUrls[0]}">`;
     const para2Html = fullHtml.slice(secondStart,secondEnd + 4);
     const img2Html = `<img id="img-2" src="${sizeUrls[1]}">`;
-
+    // console.log(para1Html)
+    // console.log(para2Html)
     const html = img1Html + para1Html + img2Html + para2Html;
     infoBox.insertAdjacentHTML('beforeend',`<h1 id="infoTitle">${country}</h1>`);
     const infoTitle = document.querySelector('#infoTitle');

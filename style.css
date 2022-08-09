@@ -137,7 +137,6 @@ body {
   min-width: 30rem;
   width: 23.438vw;
   border-radius: 0.7rem;
-  /* overflow: hidden; */
 }
 
 .errorBox {
@@ -253,7 +252,7 @@ body {
 /* Style the search menu */
 
 #menuDiv{
-  z-index: 9992;
+  z-index: 9990;
   width: 300px;
 }
 
@@ -380,6 +379,22 @@ a.disabled{
   margin: 1rem !important;
   transform: scale(1.05) translateY(35px);
   cursor: pointer;
+}
+
+.expandOnClick .neighbour::after{
+  content: 'Tap For More';
+  position: absolute;
+  right: 0;
+  top: 0;
+  border-top-right-radius: 0.7rem;
+  text-align: center;
+  font-size: 1rem;
+  width: fit-content;
+  font-weight: 300;
+  text-transform: uppercase;
+  background-color: rgba(0,0,0,0.85);
+  padding: 0.5rem 1rem 0.5rem 2rem;
+  color: #fff;
 }
 
 .expandOnClick .country__name {
