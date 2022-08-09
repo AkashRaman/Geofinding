@@ -307,7 +307,7 @@ const renderNeighbourCountries = (neighbourCountriesData) => {
       id = `country_${(boxInRow * i) + j}`;
       (maxBox > 1) ? renderCountry(neighbour, boxContainer,'neighbour') : renderCountry(neighbour, boxContainer,'neighbour');
     })
-    if(maxBox === 1) neighboursContainer.classList.add('expandOnClick');
+    if(maxBox === 1 && neighbourCountriesData.length > 1) neighboursContainer.classList.add('expandOnClick');
     boxContainer.style.opacity = 1;
     
   })
@@ -519,7 +519,20 @@ body.addEventListener('click',(e) =>{
   menu.style.display = "none"; 
 });
 
-searchBar.addEventListener('click',searchCountry);
+searchBar.addEventListener('click',searchCountry());
+
+searchBar.addEventListener('keypress', (e) => {
+  if(e.key === "Enter"){
+    searchBar.value = "";
+    const link = document.querySelectorAll('.link')[0];
+    if(!link) return;
+    menu.style.display = "none"; 
+    clearData();
+    const countrycode = link.dataset.code;
+    getCountryData(countrycode);
+    return;
+  } 
+})
 
 menu.addEventListener('click',(e) => {
   searchBar.value = "";
@@ -544,7 +557,7 @@ neighboursContainer.addEventListener('click', (e) => {
   if(!clicked) return;
   const index = +(clicked.id.slice(-1));
   modalContainer.innerHTML = '';
-  renderCountry(neighbourCountriesData[index], modalContainer,'neighbour')
+  renderCountry(neighbourCountriesData[index], modalContainer)
   modal.style.display = 'flex';
   setTimeout(()=> {
     modal.style.opacity = 1;
