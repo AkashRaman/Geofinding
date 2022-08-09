@@ -321,8 +321,8 @@ a.disabled{
 .modal-close{
   font-size: 2.75rem;
   position: fixed;
-  right: 20px;
-  top: 20px;
+  right: 7vw;
+  top: 7vw;
   cursor: pointer;
 }
 
@@ -436,8 +436,8 @@ a.disabled{
 
   #infoBtn {
     margin-bottom: 0%;
-    bottom: 10px;
-    right: 5%;
+    bottom: 5vw;
+    right: 5vw;
     margin-left: 0%;
     font-size: 2.75rem;
     z-index: 9992;
