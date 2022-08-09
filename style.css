@@ -147,6 +147,7 @@ body {
   color: #fff;
 }
 
+
 .neighboursBox:first-of-type:before {
   content: 'Neighbour country';
   position: absolute;
@@ -164,8 +165,10 @@ body {
 
 .neighbour {
   margin-top: 0!important;
+  margin-bottom: -3rem!important;
   transform: scale(0.85) translateY(1rem);
 }
+
 
 .country__img {
   min-width: 30rem;
@@ -234,7 +237,7 @@ body {
 /* Style the search box */
 #mySearch {
   width: 300px;
-  z-index: 9997;
+  z-index: 9990;
   font-size: 1.7rem;
   padding: 1rem;
   margin-top: 6rem;
@@ -249,7 +252,7 @@ body {
 /* Style the search menu */
 
 #menuDiv{
-  z-index: 9999;
+  z-index: 9992;
   width: 300px;
 }
 
@@ -292,6 +295,35 @@ a.disabled{
 
 .slide #infoBtn{
   margin-left: 30%;
+}
+
+.modal {
+  position: fixed;
+  display: none;
+  align-items: center;
+  flex-direction: column;
+  justify-content: center;
+  width: 100vw;
+  height: 100vh;
+  top: 0;
+  left: 0;
+  background-color: rgba(0,0,0,0.925);
+  z-index: 9995;
+  opacity: 0;
+  transition: opacity 500ms;
+}
+
+.modal-container {
+  width: fit-content;
+  height: fit-content;
+}
+
+.modal-close{
+  font-size: 2.75rem;
+  position: fixed;
+  right: 20px;
+  top: 20px;
+  cursor: pointer;
 }
 
 @media only screen and (max-width: 977px){
@@ -340,12 +372,51 @@ a.disabled{
   }
 }
 
+.expandOnClick .neighbour{
+  min-width: 0rem!important;
+  width: 40vw;
+  max-width: 18rem!important;
+  margin: 1rem !important;
+  transform: scale(1.05) translateY(35px);
+  cursor: pointer;
+}
+
+.expandOnClick .country__name {
+  font-size: 100%;
+  text-align: center;
+}
+
+.expandOnClick .country__region {
+  font-size: 70%;
+  text-align: center;
+  display: none;
+}
+
+
+.expandOnClick .country__data{
+  padding-top: 0.1rem;
+  padding-bottom: 0.1rem;
+}
+
+.expandOnClick .country__row{
+  display: none;
+}
+
+.expandOnClick .country__img {
+  min-width: 0rem!important;
+  max-width: 18rem !important;
+  width: 40vw;
+  min-height: 0;
+  height: calc(40vw * (17 / 30));
+  max-height: calc(18rem * (17 / 30));
+}
+
 @media only screen and (max-width: 675px){
   
   #infoContainer{
     padding: 5rem 3rem 5rem 3rem;
     height: fit-content;
-    z-index: 9998;
+    z-index: 9991;
     width: 100%;
     height: 85%;
     top: 15%;
@@ -368,8 +439,8 @@ a.disabled{
     bottom: 10px;
     right: 5%;
     margin-left: 0%;
-    font-size: 2.25rem;
-    z-index: 9999;
+    font-size: 2.75rem;
+    z-index: 9992;
   }
   .slide #infoBtn{
     margin-left: 0%;
@@ -398,7 +469,7 @@ a.disabled{
 
   .btn-country{
     padding: 1.5rem 3.75rem;
-    margin-bottom: 3rem;
+    margin: 6rem 0;
   }
 
   .neighbour {
@@ -424,6 +495,24 @@ a.disabled{
   #myMenu {
     font-size: 1.4rem;
   }
+
+  .expandOnClick .neighbour{
+    min-width: 0rem!important;
+    width: 40vw;
+    max-width: 23rem!important;
+    margin: 1rem !important;
+    transform: scale(1.05) translateY(35px);
+    cursor: pointer;
+  }
+
+  .expandOnClick .country__img {
+    min-width: 0rem!important;
+    max-width: 23rem !important;
+    width: 40vw;
+    min-height: 0;
+    height: calc(40vw * (17 / 30));
+    max-height: calc(23rem * (17 / 30));
+  }
 }
 
 @media only screen and (min-width: 676px) {
@@ -432,18 +521,3 @@ a.disabled{
     left: 10px;
   }
 }
-
-/* .expandOnClick {
-  transform: scale(1);
-  min-width: 10rem;
-  max-width: 24rem;
-}
-
-.expandOnClick .country__img {
-  min-width: 10rem;
-  max-width: 24rem !important;
-  width: 80vw;
-  min-height: calc(10rem * (17 / 30));
-  height: calc(80vw * (17 / 30));
-  max-height: calc(24rem * (17 / 30));
-} */

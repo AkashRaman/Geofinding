@@ -8,6 +8,9 @@ const menu = document.querySelector('#myMenu');
 const bodyBox = document.querySelector('.container');
 const infoBox = document.querySelector('#infoContainer');
 const infoBtn = document.querySelector('#infoBtn');
+const modal = document.querySelector('.modal');
+const modalContainer = document.querySelector('.modal-container');
+const modalCloseBtn = document.querySelector('.modal-close');
 
 let id = "";
 let maxBox, neighbourCountriesData = [], images,backgroundImage,selectedImageUrls = [],infoImageType,backgroundImageType, slideBtnClasses = [],slideBtnArrowSideway;
@@ -293,20 +296,20 @@ const renderCountry = (data, container, classname = '') => {
 
 
 const renderNeighbourCountries = (neighbourCountriesData) => {
-  const neighbourCountriesChunk = sliceIntoChunks(neighbourCountriesData,maxBox);
-
+  const boxInRow = (maxBox > 1) ? maxBox : 2;
+  const neighbourCountriesChunk = sliceIntoChunks(neighbourCountriesData,boxInRow);
+  neighboursContainer.classList.remove('expandOnClick')
   neighbourCountriesChunk.forEach((neighbourChunk,i) => {
     const boxContainerHtml = `<div class="neighboursBox" id="boxContainer-${i}"></div>`;
     neighboursContainer.insertAdjacentHTML('beforeend', boxContainerHtml);
     const boxContainer = document.querySelector(`#boxContainer-${i}`);
-    // console.log(neighbourChunk);
-    // console.log(boxContainer);
     neighbourChunk.forEach((neighbour,j) => {
-      id = `country_${(maxBox * i) + j}`;
-      // console.log(neighbour);
-      renderCountry(neighbour, boxContainer,'neighbour')
+      id = `country_${(boxInRow * i) + j}`;
+      (maxBox > 1) ? renderCountry(neighbour, boxContainer,'neighbour') : renderCountry(neighbour, boxContainer,'neighbour');
     })
+    if(maxBox === 1) neighboursContainer.classList.add('expandOnClick');
     boxContainer.style.opacity = 1;
+    
   })
 }
 
@@ -497,11 +500,21 @@ window.addEventListener('resize', () => {
   if(images) infoImageQualityChange();
   if(backgroundImage) backgroundImageQualityChange();
 })
+
+
 // Event Listners
 
 
 body.addEventListener('click',(e) =>{
   const linkClicked = (e.target.closest('#myMenu') || e.target.closest('#mySearch'));
+  const modalClicked = (e.target.classList[0] === 'modal') || (e.target.classList[0] === 'modal-container') || (e.target.classList[2] === 'modal-close');
+  // console.log(e.target.classList[0]);
+  if(modalClicked) {
+    setTimeout(()=> {
+      modal.style.display = 'none';
+    },500)
+    modal.style.opacity = 0;
+  }
   if(linkClicked) return;
   menu.style.display = "none"; 
 });
@@ -524,6 +537,20 @@ infoBtn.addEventListener('click',() => {
   if(!body.classList.contains('slide')) slideInfoBox('Yes');
   else slideInfoBox('No');
 });
+
+neighboursContainer.addEventListener('click', (e) => {
+  if(!neighboursContainer.classList.contains('expandOnClick')) return;
+  const clicked = e.target.closest('.neighbour');
+  if(!clicked) return;
+  const index = +(clicked.id.slice(-1));
+  modalContainer.innerHTML = '';
+  renderCountry(neighbourCountriesData[index], modalContainer,'neighbour')
+  modal.style.display = 'flex';
+  setTimeout(()=> {
+    modal.style.opacity = 1;
+  },5)
+});
+
 
 
 // IIFE 
