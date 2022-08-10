@@ -147,7 +147,12 @@ body {
   transition: opacity 1s;
 }
 
+.neighbour-cntry-srch{
+  display: none!important;
+}
+
 .country {
+  position: relative;
   margin: 3rem 0!important;
   background-color: #fff;
   box-shadow: 0 2rem 5rem 1rem rgb(0 0 0 / 10%);
@@ -186,6 +191,29 @@ body {
   transform: scale(0.85) translateY(1rem);
 }
 
+.neighbour .neighbour-cntry-srch,
+.modal-container .neighbour-cntry-srch{
+  display: block!important;
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  border: 0;
+  border-bottom-right-radius: 0.7rem;
+  border-color: orangered;
+  text-align: center;
+  font-size: 1.35rem;
+  width: fit-content;
+  font-weight: 300;
+  text-transform: uppercase;
+  background-color: orangered;
+  padding: 0.5rem 1rem 0.5rem 2rem;
+  color: #fff;
+  cursor: pointer;
+}
+
+.expandOnClick .neighbour .neighbour-cntry-srch{
+  display: none!important;
+}
 
 .country__img {
   min-width: 30rem;
@@ -199,7 +227,7 @@ body {
 }
 
 .country__data {
-  padding: 2.5rem 3.75rem 3rem 3.75rem;
+  padding: 2.5rem 3.75rem 3.75rem 3.75rem;
 }
 
 .country__name {
@@ -515,8 +543,12 @@ a.disabled{
     transform: scale(0.8) translateY(1rem);
   }
 
+  .neighbour-cntry-srch{
+    font-size: 1.25rem!important;
+  }
+
   .country__data {
-    padding: 1.25rem 2rem 1.75rem 2rem;
+    padding: 1.25rem 2rem 2.75rem 2rem;
   }
 
   #mySearch,

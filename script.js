@@ -2,6 +2,7 @@
 const body = document.querySelector('body');
 const btn = document.querySelector('.btn-country');
 const countriesContainer = document.querySelector('.countries');
+const countryCard = document.querySelector('.country');
 const neighboursContainer = document.querySelector('.neighbours');
 const searchBar = document.getElementById("mySearch");
 const menu = document.querySelector('#myMenu');
@@ -278,7 +279,8 @@ const toggleSlideBtnClasses = () => {
 
 const renderCountry = (data, container, classname = '') => {
   try{
-    const html = `<article class="country ${classname}" id="${id}">
+    const html = `
+    <article class="country ${classname}" id="${id}" data-code="${data.alpha3Code}">
       <img class="country__img" src="${data.flag}" />
       <div class="country__data">
         <h3 class="country__name">${data.name}</h3>
@@ -287,6 +289,7 @@ const renderCountry = (data, container, classname = '') => {
         <p class="country__row"><span>🗣️</span>${data.languages[0].name}</p>
         <p class="country__row"><span>💰</span>${data.currencies[0].name}</p>
       </div>
+      <button class="neighbour-cntry-srch">Click here for more</button>
     </article>`;
     container.insertAdjacentHTML('beforeend', html);
   } catch(err) {
@@ -343,6 +346,9 @@ const clearData = () => {
   neighbourCountriesData = [];
   infoBox.innerHTML = "";
   selectedImageUrls = [];
+  body.classList.remove('slide');
+  modal.style.display = 'none';
+  modal.style.opacity = 0;
   countriesContainer.classList.remove('errorBox');
   loadingBox.style.display = 'block';
   setTimeout(()=> {
@@ -516,7 +522,20 @@ window.addEventListener('resize', () => {
 
 
 body.addEventListener('click',(e) =>{
-  console.log(e.target);
+  // console.log(e.target);
+  if(e.target.closest('.neighbour-cntry-srch')) {
+    console.log('working');
+    clearData();
+    try {
+      const countrycode = e.target.closest('.country').dataset.code;
+      console.log(countrycode)
+      getCountryData(countrycode);
+    } catch(err) {
+      catchError(err,`${err.message}, Try Again!!`);
+      countriesContainer.style.opacity = 1;
+    }
+    return;
+  }
   const linkClicked = (e.target.closest('#myMenu') || e.target.closest('#mySearch'));
   const modalClicked = (e.target.classList[0] === 'modal') || (e.target.classList[0] === 'modal-container') || (e.target.classList[2] === 'modal-close');
   // console.log(e.target.classList[0]);
@@ -574,7 +593,6 @@ neighboursContainer.addEventListener('click', (e) => {
     modal.style.opacity = 1;
   },5)
 });
-
 
 
 // IIFE 
