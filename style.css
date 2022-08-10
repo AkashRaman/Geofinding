@@ -33,6 +33,17 @@ body {
 
 }
 
+.loading-box{
+  position: fixed;
+  top: 0;
+  font-size: 2rem;
+  padding: 3rem 7rem;
+  background-color: orangered;
+  color: #fff;
+  transform: translateY(-100%);
+  transition: all 0.5s;
+  display: none;
+}
 
 #infoBtn{
   position: fixed;
@@ -99,6 +110,13 @@ body {
 
 #infoContainer img:first-of-type {
   margin-bottom: 0;
+}
+
+.info-more:link,
+.info-more:visited{
+  font-size: 150%;
+  color: orangered;
+  text-decoration: none;
 }
 
 .container {
@@ -359,7 +377,8 @@ a.disabled{
     height: calc(40vw * (17 / 30));
   }
 
-  .btn-country{
+  .btn-country,
+  .loading-box{
     padding: 1.75rem 4.375rem;
   }
 
@@ -486,6 +505,10 @@ a.disabled{
   .btn-country{
     padding: 1.5rem 3.75rem;
     margin: 6rem 0;
+  }
+
+  .loading-box{
+    padding: 1.5rem 3.75rem;
   }
 
   .neighbour {

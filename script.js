@@ -11,6 +11,7 @@ const infoBtn = document.querySelector('#infoBtn');
 const modal = document.querySelector('.modal');
 const modalContainer = document.querySelector('.modal-container');
 const modalCloseBtn = document.querySelector('.modal-close');
+const loadingBox = document.querySelector('.loading-box');
 
 let id = "";
 let maxBox, neighbourCountriesData = [], images,backgroundImage,selectedImageUrls = [],infoImageType,backgroundImageType, slideBtnClasses = [],slideBtnArrowSideway;
@@ -64,6 +65,8 @@ const getCountryData = async (countrycode) => {
 
     getInfo(data.name);
   //Rendering Main Country 
+  loadingBox.style.display = 'none';
+  loadingBox.style.transform = 'translateY(-100%)';
     renderCountry(data, countriesContainer);
     countriesContainer.style.opacity = 1;
     //Getting neighbour country details
@@ -212,9 +215,8 @@ const getInfo = async country => {
     const data = await getJSON(`https://en.wikipedia.org/w/api.php?action=query&prop=extracts&origin=*&format=json&generator=search&gsrnamespace=0&gsrlimit=1&gsrsearch=${country}`); 
     const pages =  data.query.pages;
     const fullHtml = pages[Object.keys(pages)[0]].extract;
-    const previousEnd = fullHtml.indexOf('</p>');
-    const firstStart = fullHtml.indexOf(country) - 6;
-    const firstEnd = fullHtml.indexOf('</p>',previousEnd + 1);
+    const firstStart = fullHtml.slice(0,fullHtml.indexOf(country)).lastIndexOf('<p>');
+    const firstEnd = fullHtml.indexOf('</p>',fullHtml.indexOf('</p>') + 1);
     const secondStart = fullHtml.indexOf('<p>',firstStart + 1);
     const secondEnd = fullHtml.indexOf('</p>',firstEnd + 1);    
     selectInfoImages();
@@ -225,9 +227,10 @@ const getInfo = async country => {
     const img1Html = `<img id="img-1" src="${sizeUrls[0]}">`;
     const para2Html = fullHtml.slice(secondStart,secondEnd + 4);
     const img2Html = `<img id="img-2" src="${sizeUrls[1]}">`;
+    const morebtnHtml = `<a href="https://en.wikipedia.org/wiki/${country}" class='info-more'>More...</a>`;
     // console.log(para1Html)
     // console.log(para2Html)
-    const html = img1Html + para1Html + img2Html + para2Html;
+    const html = img1Html + para1Html + img2Html + para2Html + morebtnHtml;
     infoBox.insertAdjacentHTML('beforeend',`<h1 id="infoTitle">${country}</h1>`);
     const infoTitle = document.querySelector('#infoTitle');
     if(country.split(" ").length > 4) infoTitle.style.fontSize = '300%';
@@ -320,6 +323,8 @@ const renderNeighbourCountries = (neighbourCountriesData) => {
 
 const catchError = (err,msg) => {
   // console.error(err);
+  loadingBox.style.display = 'none';
+  loadingBox.style.transform = 'translateY(-100%)';
   if(err.message === 'No Neighbour country') return;
   countriesContainer.classList.add('errorBox');
   countriesContainer.insertAdjacentText('beforeend', msg);
@@ -339,6 +344,10 @@ const clearData = () => {
   infoBox.innerHTML = "";
   selectedImageUrls = [];
   countriesContainer.classList.remove('errorBox');
+  loadingBox.style.display = 'block';
+  setTimeout(()=> {
+    loadingBox.style.transform = 'translateY(0)';
+  },10)
 }
 
 
@@ -507,6 +516,7 @@ window.addEventListener('resize', () => {
 
 
 body.addEventListener('click',(e) =>{
+  console.log(e.target);
   const linkClicked = (e.target.closest('#myMenu') || e.target.closest('#mySearch'));
   const modalClicked = (e.target.classList[0] === 'modal') || (e.target.classList[0] === 'modal-container') || (e.target.classList[2] === 'modal-close');
   // console.log(e.target.classList[0]);
