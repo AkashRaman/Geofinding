@@ -39,13 +39,7 @@ const getPosition = () => {
 
 const getJSON = async (url, errorMsg = 'Something went wrong') => {
   const response = await fetch(url);
-  //throwing errors if there is one
-  // console.log(response.ok)
-
   if(!response.ok) throw new Error(errorMsg);
-
-  //returning response if there is no error
-
   return response.json()
 }
 
@@ -65,27 +59,31 @@ const getCountryData = async (countrycode) => {
     })  
 
     getInfo(data.name);
-  //Rendering Main Country 
-  loadingBox.style.display = 'none';
-  loadingBox.style.transform = 'translateY(-100%)';
+
+    //Showing loading box
+
+    loadingBox.style.display = 'none';
+    loadingBox.style.transform = 'translateY(-100%)';
+
+    //Rendering Main Country
+   
     renderCountry(data, countriesContainer);
     countriesContainer.style.opacity = 1;
-    //Getting neighbour country details
 
+    //Getting neighbour country details
 
     if(!data.borders) throw new Error(`No Neighbour country`);
     const neighbours = data.borders;
-    // console.log(neighbours);
-    // Getting nad rendering neighbour countries data
+    
+    // Getting and rendering neighbour countries data
 
     const GetNeighbourData = await Promise.allSettled(neighbours.map(async neighbour => getJSON(`https://restcountries.com/v2/alpha/${neighbour}`,`Country Not Found`)));
-    // console.log(GetNeighbourData);
 
     neighbourCountriesData = GetNeighbourData.map(ele => ele.value);
+
+    // Sorting neighbour countries in order of Population
+
     neighbourCountriesData.sort(function(a,b){ 
-      // console.log(a.population);
-      // console.log(b.population);
-      // console.log(a.population - b.population);
       if(a.population > b.population) return -1;
       else if(b.population > a.population) return 1;
       else return 0;
@@ -95,7 +93,6 @@ const getCountryData = async (countrycode) => {
 
     neighboursContainer.style.opacity = 1;
     renderNeighbourCountries(neighbourCountriesData);
-    // console.log(neighbourCountriesData);
   }catch(err) {
     catchError(err,`${err.message}, Try Again!!`);
     countriesContainer.style.opacity = 1;
@@ -111,7 +108,9 @@ const getBackgroundImages = async (country) => {
   try {
     const data = await getJSON(`https://api.unsplash.com/search/photos?query=${country}&client_id=CtlEUEjgZ6YVgmNHFhvqeSn2hpMgVnSqNtD3atffqyE`);
     images = data.results;
-    // console.log(images)
+
+    // Calling function to render background image
+
     renderBackground();
   } catch(e) {
     console.error(e);
@@ -127,28 +126,13 @@ const renderBackground = () => {
   let image = images.find(img => getImageInRato(img,screenratio));
   if(!image) image = images[0];
   backgroundImage = image;
-  // console.log(image.urls);
+
+  // Rendering Background Image prior to Screen width
+
   if($(window).width() <= 950) body.style.backgroundImage = `url('${backgroundImage.urls.regular}')`;
   
   if($(window).width() > 950) body.style.backgroundImage = `url('${backgroundImage.urls.raw}')`;
   
-}
-
-
-// Changin Quality of Background Image
-
-
-const backgroundImageQualityChange = () => {
-  if($(window).width() <= 950 && backgroundImageType !== 'regular') {
-    backgroundImageType = 'regular';
-    body.style.backgroundImage = `url('${backgroundImage.urls.regular}')`;
-  } 
-  if($(window).width() > 950 && backgroundImageType !== 'raw') {
-    backgroundImageType = 'raw';
-    body.style.backgroundImage = `url('${backgroundImage.urls.raw}')`;
-  }
-  // console.log(data.results[0]);
-  // console.log(url);
 }
 
 
@@ -165,6 +149,21 @@ const getImageInRato = (img, scrnratio) => {
 }
 
 
+// Changin Quality of Background Image
+
+
+const backgroundImageQualityChange = () => {
+  if($(window).width() <= 950 && backgroundImageType !== 'regular') {
+    backgroundImageType = 'regular';
+    body.style.backgroundImage = `url('${backgroundImage.urls.regular}')`;
+  } 
+  if($(window).width() > 950 && backgroundImageType !== 'raw') {
+    backgroundImageType = 'raw';
+    body.style.backgroundImage = `url('${backgroundImage.urls.raw}')`;
+  }
+}
+
+
 // Selecting images for info box
 
 
@@ -176,7 +175,7 @@ const selectInfoImages = () => {
   });
   for(let i = 0; i < 2; i++){
     let infoImg = infoImages.find(img => getImageInRato(img,'Landscape'));
-    if(!infoImg) infoImg = infoImages[i];
+    if(!infoImg) infoImg = infoImages.find(img => img !== 'skip');
     infoImages = infoImages.map(img => {
       if(img !== infoImg) return img;
       else return 'skip';
@@ -212,48 +211,62 @@ const infoImageQualityChange = () => {
 
 const getInfo = async country => {
   try {
+
+    // Removing Info icon
+
     infoBtn.classList.remove('fa-info-circle');
+
+    // Getting paragraphs from Wikipedia
+
     const data = await getJSON(`https://en.wikipedia.org/w/api.php?action=query&prop=extracts&origin=*&format=json&generator=search&gsrnamespace=0&gsrlimit=1&gsrsearch=${country}`); 
     const pages =  data.query.pages;
     const fullHtml = pages[Object.keys(pages)[0]].extract;
     const firstStart = fullHtml.slice(0,fullHtml.indexOf(country)).lastIndexOf('<p>');
-    const firstEnd = fullHtml.indexOf('</p>',fullHtml.indexOf('</p>') + 1);
-    const secondStart = fullHtml.indexOf('<p>',firstStart + 1);
-    const secondEnd = fullHtml.indexOf('</p>',firstEnd + 1);    
+    const firstEnd = fullHtml.indexOf('</p>',firstStart + 1);
+    const secondStart = fullHtml.indexOf('<p>',firstEnd + 1);
+    const secondEnd = fullHtml.indexOf('</p>',secondStart + 1);    
+
+    // Selecting Images for Info box
     selectInfoImages();
-    // console.log(fullHtml)
     let sizeUrls = (infoBox .getBoundingClientRect().width <= 350) ? [selectedImageUrls[0].small,selectedImageUrls[1].small] : [selectedImageUrls[0].regular,selectedImageUrls[1].regular];
 
+    // Creating Html for Info Box
+
+    const headingHtml = `<h1 id="infoTitle">${country}</h1>`;
     const para1Html = fullHtml.slice(firstStart,firstEnd + 4);
     const img1Html = `<img id="img-1" src="${sizeUrls[0]}">`;
     const para2Html = fullHtml.slice(secondStart,secondEnd + 4);
     const img2Html = `<img id="img-2" src="${sizeUrls[1]}">`;
     const morebtnHtml = `<a href="https://en.wikipedia.org/wiki/${country}" class='info-more'>More...</a>`;
-    // console.log(para1Html)
-    // console.log(para2Html)
-    const html = img1Html + para1Html + img2Html + para2Html + morebtnHtml;
-    infoBox.insertAdjacentHTML('beforeend',`<h1 id="infoTitle">${country}</h1>`);
+    
+    const html = headingHtml + img1Html + para1Html + img2Html + para2Html + morebtnHtml;
+
+    // Inserting Html into Info Box
+
+    infoBox.insertAdjacentHTML('beforeend',html);
     const infoTitle = document.querySelector('#infoTitle');
     if(country.split(" ").length > 4) infoTitle.style.fontSize = '300%';
     else if(country.split(" ").length > 1) infoTitle.style.fontSize = '400%';
     else infoTitle.style.fontSize = '500%';
-    infoBox.insertAdjacentHTML('beforeend',html);
+    
+    // Making Slide Active
+
     if(!body.classList.contains('slide')) slideInfoBox('Yes');
-    // console.log(start);
-    // console.log(end);
-    // console.log(html);
   } catch(e) {
     console.error(e);
   }
 }
 
 
-// Sliding Info Box
+// Toggling Sliding Info Box
 
 
 const slideInfoBox = (active) => {
   if(active === 'Yes') body.classList.add('slide');
   if(active === 'No') body.classList.remove('slide');
+  
+  // Chaning Icon of Slide btn
+
   toggleSlideBtnClasses();
 }
 
@@ -262,15 +275,19 @@ const slideInfoBox = (active) => {
 
 
 const toggleSlideBtnClasses = () => {
-  if(!infoBtn.classList.contains('fa-info-circle')) {
-    if (body.classList.contains('slide')) {
-      infoBtn.classList.remove(slideBtnClasses[1]);
-      infoBtn.classList.add(slideBtnClasses[0]);
-    } else {
-      infoBtn.classList.remove(slideBtnClasses[0]);
-      infoBtn.classList.add(slideBtnClasses[1]);
-    }
+
+  // Icon Changes only if there is no info icon
+  
+  if(infoBtn.classList.contains('fa-info-circle')) return;
+
+  if (body.classList.contains('slide')) {
+    infoBtn.classList.remove(slideBtnClasses[1]);
+    infoBtn.classList.add(slideBtnClasses[0]);
+  } else {
+    infoBtn.classList.remove(slideBtnClasses[0]);
+    infoBtn.classList.add(slideBtnClasses[1]);
   }
+  
 }
 
 
@@ -306,6 +323,13 @@ const renderNeighbourCountries = (neighbourCountriesData) => {
   const boxInRow = (maxBox > 1) ? maxBox : 2;
   const neighbourCountriesChunk = sliceIntoChunks(neighbourCountriesData,boxInRow);
   neighboursContainer.classList.remove('expandOnClick')
+
+  // Adding expandOnClick class to Neighbour container only if maxBox = 1 & there are more han one neighbour country
+
+  if(maxBox === 1 && neighbourCountriesData.length > 1) neighboursContainer.classList.add('expandOnClick');
+
+  // Adding neighbour country cards 
+
   neighbourCountriesChunk.forEach((neighbourChunk,i) => {
     const boxContainerHtml = `<div class="neighboursBox" id="boxContainer-${i}"></div>`;
     neighboursContainer.insertAdjacentHTML('beforeend', boxContainerHtml);
@@ -314,10 +338,21 @@ const renderNeighbourCountries = (neighbourCountriesData) => {
       id = `country_${(boxInRow * i) + j}`;
       (maxBox > 1) ? renderCountry(neighbour, boxContainer,'neighbour') : renderCountry(neighbour, boxContainer,'neighbour');
     })
-    if(maxBox === 1 && neighbourCountriesData.length > 1) neighboursContainer.classList.add('expandOnClick');
     boxContainer.style.opacity = 1;
-    
   })
+}
+
+
+// Slicing array into chunks
+
+
+const sliceIntoChunks = (arr, chunkSize) => {
+  const res = [];
+  for (let i = 0; i < arr.length; i += chunkSize) {
+      const chunk = arr.slice(i, i + chunkSize);
+      res.push(chunk);
+  }
+  return res;
 }
 
 
@@ -325,7 +360,6 @@ const renderNeighbourCountries = (neighbourCountriesData) => {
 
 
 const catchError = (err,msg) => {
-  // console.error(err);
   loadingBox.style.display = 'none';
   loadingBox.style.transform = 'translateY(-100%)';
   if(err.message === 'No Neighbour country') return;
@@ -377,10 +411,7 @@ const whereAmI = async () => {
     // Getting Country Data
 
     getCountryData(countrycode);
-
-    // Testing
-    // getCountryData('CHN');
-
+    
   } catch(err) {
     catchError(err,`${err.message}, Try Again!!`);
     countriesContainer.style.opacity = 1;
@@ -412,19 +443,6 @@ const searchCountry = () => {
 }
 
 
-// Slicing array into chunks
-
-
-function sliceIntoChunks(arr, chunkSize) {
-  const res = [];
-  for (let i = 0; i < arr.length; i += chunkSize) {
-      const chunk = arr.slice(i, i + chunkSize);
-      res.push(chunk);
-  }
-  return res;
-}
-
-
 // Generating Population String
 
 
@@ -448,11 +466,8 @@ const responsive = () => {
 }
 
 const resize = () => {
-  // console.log(bodyBox.getBoundingClientRect().width);
-  // console.log(maxBox);
   if(bodyBox.getBoundingClientRect().width <= 675 && maxBox !== 1){
     maxBox = 1;
-    // console.log(maxBox);
     if(neighbourCountriesData !== []) responsive();
   }
   if(body.classList.contains('slide'))responsiveVariation(1200);
@@ -462,12 +477,10 @@ const resize = () => {
 const responsiveVariation = (maxBox2MaxWidth) => {
   if (bodyBox.getBoundingClientRect().width <= maxBox2MaxWidth && bodyBox.getBoundingClientRect().width > 675 && maxBox !== 2) {
     maxBox = 2;
-    // console.log(maxBox);
     if(neighbourCountriesData !== []) responsive();
   }
   if (bodyBox.getBoundingClientRect().width > maxBox2MaxWidth && maxBox !== 3) {
     maxBox = 3;
-    // console.log(maxBox);
     if(neighbourCountriesData !== []) responsive();
   }
 }
@@ -475,7 +488,6 @@ const responsiveVariation = (maxBox2MaxWidth) => {
 new ResizeObserver(resize).observe(bodyBox)
 
 window.addEventListener('resize', () => {
-  // console.log($(window).width());
   resize();
   
   if($(window).width() / $(window).height() >= 1 && screenratio !== 'Landscape') {
@@ -503,9 +515,11 @@ window.addEventListener('resize', () => {
       toggleSlideBtnClasses();
     }
   }
+
   if($(window).width() <= 674 && slideBtnArrowSideway !== 'false'){
     slideBtnArrowSideway = 'false';
     slideBtnClasses = ['fa-arrow-alt-circle-down','fa-arrow-alt-circle-up']; 
+
     if(!infoBtn.classList.contains('fa-info-circle')) {
       infoBtn.removeAttribute('class');
       infoBtn.classList.add('fas');
@@ -522,13 +536,13 @@ window.addEventListener('resize', () => {
 
 
 body.addEventListener('click',(e) =>{
-  // console.log(e.target);
+
+  // Event listners for neighbour country search
+
   if(e.target.closest('.neighbour-cntry-srch')) {
-    console.log('working');
     clearData();
     try {
       const countrycode = e.target.closest('.country').dataset.code;
-      console.log(countrycode)
       getCountryData(countrycode);
     } catch(err) {
       catchError(err,`${err.message}, Try Again!!`);
@@ -536,18 +550,27 @@ body.addEventListener('click',(e) =>{
     }
     return;
   }
-  const linkClicked = (e.target.closest('#myMenu') || e.target.closest('#mySearch'));
+
+  // Event listners for Modal box
+
   const modalClicked = (e.target.classList[0] === 'modal') || (e.target.classList[0] === 'modal-container') || (e.target.classList[2] === 'modal-close');
-  // console.log(e.target.classList[0]);
+  
   if(modalClicked) {
     setTimeout(()=> {
       modal.style.display = 'none';
     },500)
     modal.style.opacity = 0;
   }
+
+  // Event Listeners for Menu box and Search bar
+
+  const linkClicked = (e.target.closest('#myMenu') || e.target.closest('#mySearch'));
+  
   if(linkClicked) return;
   menu.style.display = "none"; 
 });
+
+// Event listners for search bar
 
 searchBar.addEventListener('click',searchCountry());
 
@@ -564,6 +587,8 @@ searchBar.addEventListener('keypress', (e) => {
   } 
 })
 
+// Event listners for Menu box
+
 menu.addEventListener('click',(e) => {
   searchBar.value = "";
   const clicked = e.target.closest('.link');
@@ -574,17 +599,30 @@ menu.addEventListener('click',(e) => {
   getCountryData(countrycode);
 });
 
+// Event listners for Where am I Button
+
 btn.addEventListener('click',whereAmI);
+
+// Event listners for Slide Button
 
 infoBtn.addEventListener('click',() => {
   if(!body.classList.contains('slide')) slideInfoBox('Yes');
   else slideInfoBox('No');
 });
 
+// Event listners for Neighbour Cards with expandOnCLick Class in Neighbour Countainer
+
 neighboursContainer.addEventListener('click', (e) => {
+
+  // Function runs only if Neighbour Countainer has expandOnCLick Class
+  
   if(!neighboursContainer.classList.contains('expandOnClick')) return;
+
+  // Function runs only if Neighbour COuntry Card is clicked
+
   const clicked = e.target.closest('.neighbour');
   if(!clicked) return;
+
   const index = +(clicked.id.slice(-1));
   modalContainer.innerHTML = '';
   renderCountry(neighbourCountriesData[index], modalContainer)
