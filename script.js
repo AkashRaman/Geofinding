@@ -431,10 +431,12 @@ const searchCountry = () => {
     return;
   };
   menu.style.display = "block";
-  countryNames.forEach(country => {
+  let linkId = "1";
+  countryNames.forEach((country,i) => {
     if(country[0].toUpperCase().indexOf(input) > -1){
-      const liHtml = `<li><a href="#" data-code="${country[1]}" class="link">${country[0]} (${country[1]})</a></li>`;
+      const liHtml = `<li><a href="#" data-code="${country[1]}" class="link" id="${linkId}">${country[0]} (${country[1]})</a></li>`;
       menu.insertAdjacentHTML('beforeend',liHtml);
+      linkId = `${(+linkId) + 1}`;
     }
   });
   if(menu.innerHTML === "") {
@@ -586,6 +588,30 @@ searchBar.addEventListener('keypress', (e) => {
     return;
   } 
 })
+
+document.addEventListener( 'keydown', e => {
+  const currentInput = document.activeElement;
+  if(!((e.key === "ArrowUp" || e.key === "ArrowDown") && currentInput.id == "mySearch")) return;
+    
+  const links = Array.from(document.querySelectorAll('.link'));
+  if(links.length === 0) return;
+  let nextActLnkId;
+  const cntActiveLink = links.find(link => link.classList.contains('active'));
+  const cntactLnkId = (cntActiveLink) ? cntActiveLink.id : "0";
+  links.map(link => link.classList.remove('active'))
+  if(e.key === "ArrowDown") nextActLnkId = ((+cntactLnkId) < links.length) ? `${(+cntactLnkId) + 1}` : "1";
+  if(e.key === "ArrowUp") nextActLnkId = ((+cntactLnkId) > 1) ? `${(+cntactLnkId) - 1}` : `${links.length}`;
+  const selectedLink = document.getElementById(nextActLnkId);
+  const selectedLinkHtml = selectedLink.innerHTML.slice(0,selectedLink.innerHTML.lastIndexOf(' '));
+  selectedLink.classList.add('active');
+  searchBar.value = selectedLinkHtml;
+});
+
+document.addEventListener('keyup', e => {
+  const currentInput = document.activeElement;
+  if(!((e.key === "ArrowUp" || e.key === "ArrowDown") && currentInput.id == "mySearch")) searchCountry();
+})
+
 
 // Event listners for Menu box
 

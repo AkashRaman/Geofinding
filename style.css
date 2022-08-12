@@ -326,6 +326,10 @@ body {
   background-color: #eee;
 }
 
+.link.active {
+  background-color: #eee;
+}
+
 a.disabled{
   pointer-events: none;
 }
