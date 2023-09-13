@@ -400,10 +400,12 @@ const whereAmI = async () => {
   try {
     const pos = await getPosition();
     const { latitude, longitude } = pos.coords;
-
+    console.log(latitude);
+    console.log(longitude);
     //Getting country of our location
 
     const data = await getJSON(`https://geocode.xyz/${latitude},${longitude}?json=1`,`Problems with geocoding`);
+    console.log(data);
     console.log(`You are in ${data.city}, ${data.country}`);
     const countrycode = countryNames.find(e => e[0] === data.country)[1];
     console.log(countrycode);
